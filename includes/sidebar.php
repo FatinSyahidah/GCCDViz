@@ -8,8 +8,13 @@
                 <ul class="metismenu" id="menu">
                     <li class="nav-label">Navigation</li>
                     <li>
-                        <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                        <a class="" href="././index.php">
                             <i class="icon-speedometer menu-icon"></i><span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                            <i class="icon-grid menu-icon"></i><span class="nav-text">Details</span>
                         </a>
                         <ul aria-expanded="false">
                             <li><a href="./pages/J2sdk.php">J2sdk1.4.0-javax-swing</a></li>

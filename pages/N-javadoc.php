@@ -28,13 +28,13 @@
     <!--*******************
         Preloader start
     ********************-->
-    <!-- <div id="preloader">
+    <div id="preloader">
         <div class="loader">
             <svg class="circular" viewBox="25 25 50 50">
                 <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="3" stroke-miterlimit="10" />
             </svg>
         </div>
-    </div> -->
+    </div>
     <!--*******************
         Preloader end
     ********************-->
@@ -58,7 +58,7 @@
         <div class="content-body">
             <div class="row page-titles mx-0">
                 <!-- <div class="col-sm-6"> -->
-                <h2>Dashboard</h2>
+                <!-- <h2>Dashboard</h2> -->
                 <!-- </div> -->
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
@@ -74,8 +74,8 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Overall Clone Type</h4>
-                                <div id="pieChartContainer" style="width: 500px; height: 300;">
+                                <h4 class="card-title" style="font-size: 16px;">Overall Clone Type</h4>
+                                <div id="pieChartContainer">
                                     <canvas id="pieChart"></canvas>
                                 </div>
                             </div>
@@ -84,8 +84,8 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Process Time Performance</h4>
-                                <div id="pieChartContainer2" style="width: 500px; height: 300;">
+                                <h4 class="card-title" style="font-size: 16px;">Process Time Performance</h4>
+                                <div id="pieChartContainer2">
                                     <canvas id="pieChart2"></canvas>
                                 </div>
                             </div>
@@ -99,8 +99,8 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Runtime Performance based on Clone Types (miliseconds)</h4>
-                                <div id="barChartContainer" style="width: 500px; height: 300;">
+                                <h4 class="card-title" style="font-size: 16px;">Runtime Performance based on Clone Types (miliseconds)</h4>
+                                <div id="barChartContainer">
                                     <canvas id="barChart"></canvas>
                                 </div>
                             </div>
@@ -109,8 +109,8 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Runtime Performance of Netbeans-javadoc</h4>
-                                <div id="barChartContainer2" style="width: 500px; height: 300;">
+                                <h4 class="card-title" style="font-size: 16px;">Runtime Performance of Netbeans-javadoc</h4>
+                                <div id="barChartContainer2">
                                     <canvas id="barChart2"></canvas>
                                 </div>
                             </div>
@@ -144,81 +144,159 @@
 
     <!-- pie chart -->
     <script>
-       const ctx = document.getElementById('pieChart');
-       const pieChartContainer = document.getElementById('pieChartContainer');
+        const ctx = document.getElementById('pieChart');
+        const pieChartContainer = document.getElementById('pieChartContainer');
+        Chart.register(ChartDataLabels);
+
+        // Parse CSV data from local storage
+        const parsedData = localStorage.getItem('uploadedCSV');
+        const lines = parsedData.split('\n').slice(1); // Remove header
+
+        const chartData = {};
+
+        // Iterate over each line to aggregate data for Netbeans-javadoc applications
+        lines.forEach(line => {
+            const [appName, , , cType, cCount] = line.split(',');
+
+            // Check if the application is a Netbeans-javadoc application and avoid duplicates
+            if (appName.includes('Netbeans-javadoc')) {
+                if (!chartData[cType]) {
+                    chartData[cType] = 0;
+                }
+                // Aggregate CCount for each Ctype
+                chartData[cType] += parseInt(cCount);
+            }
+        });
+
+        const chartLabels = Object.keys(chartData);
+        const chartDataValues = Object.values(chartData);
 
         new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Type-1', 'Type-2', 'Type-3', 'Type-4'],
+                labels: chartLabels,
                 datasets: [{
-                label: 'Amount of Source File',
-                data: [12, 19, 3, 5],
-                backgroundColor: [
-                        '#FF6384',
-                        'rgba(153, 102, 255, 0.8)',
-                        '#36A2EB',
-                        '#20C997'
+                    label: 'Amount of Source File',
+                    data: chartDataValues,
+                    backgroundColor: [
+                        'rgba(255,0,170,0.7)',
+                        'rgba(170,0,255, 0.8)',
+                        'rgba( 0, 170, 255 , 0.8)',
+                        'rgba(32,201,151,1)'
                     ],
                     borderColor: [
-                        '#FF6384',
-                        'rgba(153, 102, 255, 0.8)',
-                        '#36A2EB',
-                        '#20C997'
+                        'rgba(255,0,170,0.7)',
+                        'rgba(170,0,255, 0.8)',
+                        'rgba( 0, 170, 255 , 0.8)',
+                        'rgba(32,201,151,1)'
                     ],
-                borderWidth: 1
+                    borderWidth: 1
                 }]
             },
             options: {
                 responsive: true, // Enable responsiveness
-                maintainAspectRatio: false // Disable aspect ratio
+                maintainAspectRatio: false, // Disable aspect ratio
+                plugins: {
+                    datalabels: {
+                        color: 'rgba(48,48,48)', // Color of the data label
+                        anchor: 'center', // Position of the data label (end for top of the bar)
+                        align: 'center', // Alignment of the data label (end for right-aligned)
+                        formatter: function (value, context) {
+                            // Display the actual data value
+                            return value;
+                        }
+                    }
+                }
             }
         });
 
         // Set width and height of container div
         pieChartContainer.style.width = '100%';
-        pieChartContainer.style.height = '335px';
+        pieChartContainer.style.height = '305px';
     </script>
     <!-- end pie chart -->
 
     <!-- pie chart 2 -->
     <script>
        const ctx2 = document.getElementById('pieChart2');
-       const pieChartContainer2 = document.getElementById('pieChartContainer2');
+        const pieChartContainer2 = document.getElementById('pieChartContainer2');
+
+        // Get parsed data from local storage for the second chart
+        const parsedData2 = localStorage.getItem('uploadedCSV');
+        const lines2 = parsedData2.split('\n').slice(1); // Remove header
+
+        // Initialize chart data object for the second chart
+        const chartData2 = {
+            'Pre-processing': 0,
+            'Transformation': 0,
+            'Parameterization': 0,
+            'Categorization': 0,
+            'Match Detection': 0
+        };
+
+        // Iterate over each line to aggregate data for the second chart
+        lines2.forEach(line => {
+            const [appName, , , , , preprcss, trans, prmtrzn, ctg, matchD] = line.split(',');
+
+            // Check if the application is a Netbeans-javadoc application
+            if (appName.includes('Netbeans-javadoc')) {
+                // Aggregate data for Preprcss, Trans, Prmtrzn, Ctg, and MatchD
+                chartData2['Pre-processing'] = parseInt(preprcss);
+                chartData2['Transformation'] = parseInt(trans);
+                chartData2['Parameterization'] = parseInt(prmtrzn);
+                chartData2['Categorization'] = parseInt(ctg);
+                chartData2['Match Detection'] = parseInt(matchD);
+            }
+        });
+
+        // Get chart labels and values for the second chart
+        const chartLabels2 = Object.keys(chartData2);
+        const chartDataValues2 = Object.values(chartData2);
 
         new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: ['Pre-processing', 'Transformation', 'Parameterization', 'Categorization', 'Match Detection'],
+                labels: chartLabels2,
                 datasets: [{
-                label: 'Miliseconds',
-                data: [12, 19, 3, 5, 20],
-                backgroundColor: [
-                        '#FF6384',
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(54, 162, 228, 0.9)',
-                        '#20C997',
-                        'rgba(255, 205, 41, 0.6)'
+                    label: 'Milliseconds',
+                    data: chartDataValues2,
+                    backgroundColor: [
+                        'rgba(255,0,170,0.7)',
+                        'rgba(170,0,255, 0.8)',
+                        'rgba( 0, 170, 255 , 0.8)',
+                        'rgba(32,201,151,1)',
+                        'rgba(255, 205, 41, 1)'
                     ],
                     borderColor: [
-                        '#FF6384',
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(54, 162, 228, 0.9)',
-                        '#20C997',
-                        'rgba(255,205,41, 0.6)'
+                        'rgba(255,0,170,0.7)',
+                        'rgba(170,0,255, 0.8)',
+                        'rgba( 0, 170, 255 , 0.8)',
+                        'rgba(32,201,151,1)',
+                        'rgba(255,205,41,1)'
                     ],
-                borderWidth: 1
+                    borderWidth: 1
                 }]
             },
             options: {
                 responsive: true, // Enable responsiveness
-                maintainAspectRatio: false // Disable aspect ratio
+                maintainAspectRatio: false, // Disable aspect ratio
+                plugins: {
+                    datalabels: {
+                        color: 'rgba(48,48,48)', // Color of the data label
+                        anchor: 'center', // Position of the data label (end for top of the bar)
+                        align: 'center', // Alignment of the data label (end for right-aligned)
+                        formatter: function (value, context) {
+                            // Display the actual data value
+                            return value;
+                        }
+                    }
+                }
             }
         });
 
-        // Set width and height of container div
+        // Set width and height of container div for the second chart
         pieChartContainer2.style.width = '100%';
-        pieChartContainer2.style.height = '335px';
+        pieChartContainer2.style.height = '305px';
     </script>
     <!-- end pie chart 2 -->
 
@@ -227,27 +305,53 @@
         const ctx3 = document.getElementById('barChart');
         const barChartContainer = document.getElementById('barChartContainer');
 
+        // Parse CSV data from local storage
+        const parsedDataNJava = localStorage.getItem('uploadedCSV');
+        const linesNJava = parsedDataNJava.split('\n').slice(1); // Remove header
+
+        let labels = [];
+        let type1_2Data = [];
+        let type3_4Data = [];
+
+        // Iterate over each line to accumulate NJava data
+        linesNJava.forEach(line => {
+            // Split line and trim spaces
+            const parts = line.split(',').map(part => part.trim());
+
+            // Check if line has enough columns and the correct app name
+            if (parts.length >= 11 && parts[0] === 'Netbeans-javadoc') {
+                const type1_2 = parts[10];
+                const type3_4 = parts[11];
+
+                // Aggregate data only for J2sdk application
+                if (!labels.includes('Netbeans-javadoc')) {
+                    labels.push('Netbeans-javadoc');
+                }
+                type1_2Data.push(type1_2 ? parseInt(type1_2) : 0);
+                type3_4Data.push(type3_4 ? parseInt(type3_4) : 0);
+            }
+        });
+        
+
+        // Render the chart using Chart.js
         new Chart(ctx3, {
             type: 'bar',
             data: {
-                labels: ['Type-1', 'Type-2', 'Type-3', 'Type-4'],
+                labels: labels,
                 datasets: [{
-                    label: 'Runtime Performance',
-                    data: [12, 19, 3, 5],
-                    backgroundColor: [
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(153, 102, 255, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgb(153, 102, 255)',
-                        'rgb(153, 102, 255)',
-                        'rgb(153, 102, 255)',
-                        'rgb(153, 102, 255)'
-                    ],
-                    borderWidth: 1
-                }]
+                        label: 'Type-1 & Type-2',
+                        data: type1_2Data,
+                        backgroundColor: 'rgba(0, 170, 255, 0.8)',
+                        borderColor: 'rgba(0, 170, 255, 0.8)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Type-3 & Type-4',
+                        data: type3_4Data,
+                        backgroundColor: 'rgba(255,0,170,0.7)',
+                        borderColor: 'rgba(255,0,170,0.7)',
+                        borderWidth: 1
+                    }]
             },
             options: {
                 plugins: {
@@ -264,8 +368,19 @@
                                 return label;
                             }
                         }
+                    },
+                    datalabels: {
+                        color: 'rgba(48,48,48)', // Color of the data label
+                        anchor: 'center', // Position of the data label (end for top of the bar)
+                        align: 'center', // Alignment of the data label (end for right-aligned)
+                        formatter: function (value, context) {
+                            // Display the actual data value
+                            return value;
+                        }
                     }
                 },
+                barPercentage: 0.6, // Adjust the width of the bars
+                categoryPercentage: 0.75, // Adjust the spacing between the bars
                 responsive: true, // Enable responsiveness
                 maintainAspectRatio: false, // Disable aspect ratio
                 layout: {
@@ -276,21 +391,24 @@
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        stacked: true
                     },
                     x: {
+                        stacked: true,
                         ticks: {
                             autoSkip: false, // Disable auto skipping of labels
-                            maxRotation: 50, // Rotate labels to 180 degrees
-                            minRotation: 50 // Rotate labels to 180 degrees
+                            maxRotation: 0, // Rotate labels to 180 degrees
+                            minRotation: 0 // Rotate labels to 180 degrees
                         }
                     }
                 }
             }
         });
+
         // Set width and height of container div
         barChartContainer.style.width = '100%';
-        barChartContainer.style.height = '350px';
+        barChartContainer.style.height = '305px';
     </script>
     <!-- end bar chart -->
 
@@ -299,16 +417,47 @@
         const ctx4 = document.getElementById('barChart2').getContext('2d');
         const barChartContainer2 = document.getElementById('barChartContainer2');
 
+        // Get parsed data from local storage for the second chart
+        const parsedDataNJava2 = localStorage.getItem('uploadedCSV');
+        const linesNJava2 = parsedData2.split('\n').slice(1); // Remove header
+
+        // Initialize chart data object for the second chart
+        const chartDataNJava = {
+            'Pre-processing': 0,
+            'Transformation': 0,
+            'Parameterization': 0,
+            'Categorization': 0,
+            'Match Detection': 0
+        };
+
+        // Iterate over each line to aggregate data for the second chart
+        linesNJava2.forEach(line => {
+            const [appName, , , , , preprcss, trans, prmtrzn, ctg, matchD] = line.split(',');
+
+            // Check if the application is a NJava application
+            if (appName.includes('Netbeans-javadoc')) {
+                // Aggregate data for Preprcss, Trans, Prmtrzn, Ctg, and MatchD
+                chartDataNJava['Pre-processing'] = parseInt(preprcss);
+                chartDataNJava['Transformation'] = parseInt(trans);
+                chartDataNJava['Parameterization'] = parseInt(prmtrzn);
+                chartDataNJava['Categorization'] = parseInt(ctg);
+                chartDataNJava['Match Detection'] = parseInt(matchD);
+            }
+        });
+
+        // Get chart labels and values for the second chart
+        const chartLabelsNJava = Object.keys(chartDataNJava);
+        const chartDataValuesNJava = Object.values(chartDataNJava);
+
         const data4 = {
-            labels: ['Pre-processing', 'Transformation', 'Parameterization', 'Categorization', 'Match Detection'],
+            labels: chartLabelsNJava,
             datasets: [{
                 label: 'Runtime Performance',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)', // Red
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255,231,0,1)', // Green
+                borderColor: 'rgba(255,231,0,1)',
                 borderWidth: 1,
-                data: [10, 15, 20, 25, 30]
-            }
-        ]
+                data: chartDataValuesNJava
+            }]
         };
 
         const options4 = {
@@ -324,7 +473,10 @@
                     }
                 },
                 y: {
-                    stacked: false // Disable stacking on the y-axis
+                    stacked: false, // Disable stacking on the y-axis
+                    suggestedMin: 0,
+                    min: 0,
+                    suggestedMax: 1000
                 }
             },
             plugins: {
@@ -341,6 +493,15 @@
                             return label;
                         }
                     }
+                },
+                datalabels: {
+                    color: 'rgba(48,48,48)', // Color of the data label
+                    anchor: 'end', // Position of the data label (end for top of the bar)
+                    align: 'top', // Alignment of the data label (end for right-aligned)
+                    formatter: function (value, context) {
+                        // Display the actual data value
+                        return value;
+                    }
                 }
             },
             barPercentage: 0.95, // Adjust the width of the bars
@@ -355,7 +516,7 @@
 
         // Set width and height of container div
         barChartContainer2.style.width = '100%';
-        barChartContainer2.style.height = '350px';
+        barChartContainer2.style.height = '305px';
     </script>
     <!-- end multiple line chart -->
 
